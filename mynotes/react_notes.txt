@@ -1,0 +1,43 @@
+--- create new react application ---------
+npx create-react-app my-app
+cd my-app
+
+--- run the application ---------
+npm start  or yarn start
+
+
+
+---------- code --------
+--------app.js--------
+class App extends Component {
+  constructor(){
+    super();
+    this.state = {
+      monsters: [
+        {
+          name : 'Frankenstien',
+          id: '101'
+        },
+        {
+          name : 'Dracula',
+          id: '102'
+        },
+        {
+          name : 'Zombie',
+          id: '103'
+        }
+      ]
+
+    };
+  }
+
+  render(){
+    return (
+      <div className="App">
+        {
+          this.state.monsters.map(monster => <h1 key={monster.id}> { monster.name} </h1>)
+        }
+      </div>
+    );
+  }
+}

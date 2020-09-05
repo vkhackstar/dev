@@ -1,0 +1,189 @@
+------------- telco customer churn ---------
+-------Imports ----------
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+---------histogram----------
+df['Churn'].hist();
+sns.distplot( df['Churn'])
+
+-------- boxplot-------
+sns.boxplot( x = 'churn',y = 'account_length', hue='Intl_Plan', data = df)
+plt.show()
+# No outlier
+sns.boxplot( x = 'churn', y = 'account_length', hue='Intl_Plan', data = df, sym = "")
+plt.show()
+
+sns.boxplot(x = 'Churn', y = 'CustServ_Calls', data = telco)
+sns.boxplot(x = 'Churn', y = 'CustServ_Calls', data = telco, sym = "", hue = "Intl_Plan")
+
+"""
+It looks like customers who do churn end up leaving more customer service calls, unless these customers also have an international plan, in which case they leave fewer customer service calls. This type of information is really useful in better understanding the drivers of churn. It's now time to learn about how to preprocess your data prior to modeling.
+"""
+-------data pre processing--------
+
+In [2]: telco.dtypes
+Out[2]: 
+Account_Length      int64
+Vmail_Message       int64
+Day_Mins          float64
+Eve_Mins          float64
+Night_Mins        float64
+Intl_Mins         float64
+CustServ_Calls      int64
+Churn              object
+Intl_Plan          object
+Vmail_Plan         object
+Day_Calls           int64
+Day_Charge        float64
+Eve_Calls           int64
+Eve_Charge        float64
+Night_Calls         int64
+Night_Charge      float64
+Intl_Calls          int64
+Intl_Charge       float64
+State              object
+dtype: object
+
+"""
+int64 & float64: Numeric data types
+Object: Categorical 
+
+Categorical:
+lable encoding, one hot encoding 
+Numeric: Scaling
+"""
+
+# Replace 'no' with 0 and 'yes' with 1 in 'Vmail_Plan'
+telco['Vmail_Plan'] = telco['Vmail_Plan'].replace({'no':0, 'yes':1})
+
+# Replace 'no' with 0 and 'yes' with 1 in 'Churn'
+telco['Churn'] = telco['Churn'].replace({'no':0, 'yes':1})
+
+# Print the results to verify
+print(telco['Vmail_Plan'].head())
+print(telco['Churn'].head())
+
+------ one hot encoding ------
+# Perform one hot encoding on 'State'
+telco_state = pd.get_dummies(telco['State'])
+
+---------Scaling -------
+# Import StandardScaler
+from sklearn.preprocessing import StandardScaler
+
+# Scale telco using StandardScaler
+telco_scaled = StandardScaler().fit_transform(telco)
+
+# Add column names back for readability
+telco_scaled_df = pd.DataFrame(telco_scaled, columns=["Intl_Calls", "Night_Mins"])
+
+------------ drop columns ---------------
+# Drop the unnecessary features
+telco = telco.drop(telco[['Area_Code','Phone']], axis=1)
+
+# Verify dropped features
+print(telco.columns)
+--------------feature engineering-----------
+# Create the new feature
+telco['Avg_Night_Calls'] = telco['Night_Mins']/ telco['Night_Calls']
+
+# Print the first five rows of 'Avg_Night_Calls'
+print(telco['Avg_Night_Calls'].head())
+
+
+--------------Predictature engineering-----------
+
+---------- Logistic REgression -----------------------------------------------------
+# Import LogisticRegression
+from sklearn.linear_model import LogisticRegression
+
+# Instantiate the classifier
+clf = LogisticRegression()
+
+# Fit the classifier
+clf.fit(telco[features], telco['Churn'])
+
+# Predict the label of new_customer
+print(clf.predict(new_customer))
+
+----------- Decision Tree ------------------
+# Import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeClassifier
+
+# Instantiate the classifier
+clf = DecisionTreeClassifier()
+
+# Fit the classifier
+clf.fit(telco[features], telco['Churn'])
+
+# Predict the label of new_customer
+print(clf.predict(new_customer))
+
+---------------Train, Test Split------------------
+
+from sklearn.model_selction import train_test_split
+
+# Import train_test_split
+from sklearn.model_selection import train_test_split
+
+# Create feature variable
+X = telco.drop('Churn', axis=1)
+
+# Import train_test_split
+from sklearn.model_selection import train_test_split
+
+# Create feature variable
+X = telco.drop('Churn', axis=1)
+
+# Create target variable
+y = telco['Churn']
+
+# Create training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.3)
+
+---------------------- Random Forest ---------
+# Import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier
+
+# Instantiate the classifier
+clf = RandomForestClassifier()
+
+# Fit to the training data
+clf.fit(X_train, y_train)
+
+# Compute accuracy
+print(clf.score(X_test, y_test))
+---------------- model optimization ---------
+# imabalanced classes
+telco['Churn'].value_counts()
+
+
+------------Confusion Matrix --------
+
+
+                 Actual 
+              |  Y   |  N   |
+          ------------------     
+    Model Y   |  TP  |  FP  | --> Precision = TP/(TP+FP)  (Probability of + over total predicted +)
+          ------------------    
+          N   |  FN  |  TN  |
+          ------------------    Accuracy = TP+TN / ( TP+TN+FP+FN)   Correct over total
+               Recall
+               TP/(TP+FN)
+               Probablity of + over total + 
+
+
+from sklearn.metrices import confusion_matrix
+
+y_pred = clf.predict(y_test)
+
+cm = confusion_matrix(y_test, y_pred)
+
+---------------------------------------
+
+
+

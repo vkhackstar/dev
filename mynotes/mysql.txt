@@ -1,0 +1,5 @@
+-------------- mysql -----------
+show databases;    # list all the databases
+create database my_db;   
+use my_db;
+select database();   # shows 
